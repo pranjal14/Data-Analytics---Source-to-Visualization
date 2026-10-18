@@ -1,1 +1,12 @@
 
+Implementation Flow: Establish the source data and business grain, prepare governed Snowflake objects, ingest and transform data through Power Query, construct the dimensional star schema, develop reusable DAX measures, build interactive reports, implement dynamic row-level security (RLS), and validate and deploy the solution.
+The implementation will keep source data preparation close to Snowflake while using Power BI for semantic modeling, governed business calculations, security, and interactive analysis. The objective is to build a production-oriented financial analytics solution that transforms customer, enterprise, contract, and historical snapshot data into a secure, scalable, and reusable semantic model.
+
+Source System: Snowflake will serve as the source of truth for customer, enterprise, contract, and contract-snapshot data.
+Data Ingestion and Transformation: The native Snowflake connector and Power Query will support data retrieval, profiling, cleansing, and transformation, with reusable source-side preparation performed in Snowflake where appropriate.
+Data Model: A dimensional star schema will use FactContract for contract-level analysis and FactContractSnapshot for historical balances and contract status.
+Dimension Tables: DimCustomer, DimEnterprise, and DimDate will provide descriptive attributes and consistent filtering across the analytical model.
+Business Measures: Reusable DAX measures will calculate principal, outstanding balance, active contracts, delinquency, financial exposure, and time-intelligence KPIs.
+Security: Dynamic RLS will restrict report data according to the authenticated Power BI user and the corresponding authorized enterprise-access mapping.
+Reporting and Analytics: An executive portfolio dashboard and supporting drill-down reports will enable analysis across enterprise, customer, contract, and reporting-period dimensions.
+Validation and Deployment: Data reconciliation, KPI verification, performance testing, security validation, and Power BI Service configuration will ensure the solution is reliable and ready for business consumption.
