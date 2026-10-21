@@ -1,1 +1,23 @@
 
+The solution will follow a layered architecture in which Snowflake manages source data preparation and curated data access, while Power BI handles data ingestion, dimensional modeling, business calculations, security, and visualization. The raw source will be retained in FINANCE_RAW.CUSTOMER_CONTRACTS, with standardized and analytics-ready views or tables exposed through FINANCE_ANALYTICS.PBI. Only the columns and records required for reporting will be made available to Power BI, reducing unnecessary data movement and simplifying downstream transformations.
+
+Implementation Sequence:
+
+Retain the original source data in Snowflake.
+Create curated views or tables in the FINANCE_ANALYTICS.PBI schema.
+Standardize data types, validate business keys, and expose only the required analytical fields.
+Connect Power BI to the curated Snowflake objects using the native connector and Power Query.
+Build the dimensional model using fact tables, dimension tables, and reusable DAX measures.
+Develop reports, configure dynamic RLS, validate the solution, and publish the governed semantic model to Power BI Service.
+
+Recommended Architecture Components:
+
+Snowflake Raw Layer: FINANCE_RAW.CUSTOMER_CONTRACTS retains the source customer and contract data.
+
+Snowflake Curated Layer: FINANCE_ANALYTICS.PBI provides standardized, validated, and reporting-ready data through views or tables.
+
+Power BI Ingestion Layer: Power Query connects to Snowflake and manages required data preparation. Import mode is suitable for many analytical workloads, while DirectQuery or a composite model may be appropriate when data volume, freshness, or operational requirements justify it.
+
+Semantic Modeling Layer: FactContract, FactContractSnapshot, DimCustomer, DimEnterprise, DimProduct, and DimDate establish the analytical structure, relationships, and governed business measures.
+
+Reporting and Security Layer: Power BI reports provide KPI cards, portfolio trends, financial exposure breakdowns, risk analysis, and enterprise-level drill-down, with dynamic RLS controlling access to authorized data.
