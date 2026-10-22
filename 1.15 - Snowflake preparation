@@ -1,1 +1,14 @@
 
+Snowflake preparation establishes a governed, analytics-ready data layer before ingestion into Power BI. The objective is to standardize source data, define the required business grain, separate descriptive attributes from measurable events, and expose only validated objects needed for reporting.
+Implementation Steps:
+Confirm Source Access: Verify that FINANCE_RAW.CUSTOMER_CONTRACTS exists and that the implementation identity has the required database, schema, and object-level permissions to read the source data.
+Create the Curated Schema: Use the FINANCE_ANALYTICS database and PBI schema to organize reporting-ready views or tables separately from the raw source layer.
+Create the Contract Base View: Build a curated view containing the required contract, customer, enterprise, product, and financial attributes. Exclude records without a valid ContractID, standardize data types, derive date keys where required, and create a contract-count indicator (CONTRACT_COUNT) for consistent aggregation.
+Create Dimension Views: Prepare DimCustomer, DimEnterprise, and DimProduct views with distinct business keys and standardized descriptive attributes. Keep contract-level financial measures in the fact layer and ensure each dimension key uniquely identifies its intended entity.
+Create the Date Dimension: Generate a continuous calendar covering the required reporting period, with DateKey, Date, Year, Quarter, MonthNumber, Month, and YearMonth attributes to support consistent filtering and time-based analysis.
+Prepare Contract Snapshots: Where historical reporting is required, create a separate snapshot view containing ContractID, SnapshotDate, outstanding balance, delinquency information, and the contract status recorded at that point in time. Confirm that the snapshot grain is clearly defined, ideally one record per contract per snapshot date.
+Validate the Curated Layer: Reconcile source and curated row counts, check key uniqueness and referential integrity, validate date and numeric fields, and compare representative financial totals against the raw source. Investigate discrepancies before connecting Power BI.
+Apply Access Controls: Grant Power BI access only to approved curated objects using the organization's approved authentication and authorization pattern, such as OAuth/SSO or an appropriately configured service identity. Keep credentials outside PBIX files and follow organizational security policies.
+
+The recommended approach is to expose curated Snowflake views or tables rather than connect Power BI directly to every raw column. This centralizes reusable data preparation, reduces unnecessary data exposure, and provides a controlled foundation for semantic modeling and reporting.
+Create a curated view rather than exposing every raw column directly to the report.
