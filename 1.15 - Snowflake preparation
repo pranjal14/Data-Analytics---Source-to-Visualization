@@ -10,3 +10,99 @@ Validate the Curated Layer: Reconcile source and curated row counts, verify key 
 Apply Access Controls: Grant Power BI access only to approved curated objects using the organization's approved authentication pattern, such as OAuth/SSO or a governed service identity. Keep credentials outside PBIX files and follow organizational security policies.
 
 The recommended approach is to expose curated Snowflake views and tables rather than connect Power BI directly to every raw column. This centralizes reusable preparation logic, reduces unnecessary data exposure, and provides a controlled foundation for semantic modeling and reporting.
+
+
+Representative Snowflake SQL Implementation
+The following SQL illustrates the core preparation layer. It assumes the raw contract source contains one record per contract and that historical snapshot data is available separately. Replace source database and object names with those used in the target environment.
+
+-- 1. Create the analytics layer if it does not exist.
+CREATE DATABASE IF NOT EXISTS FINANCE_ANALYTICS;
+CREATE SCHEMA IF NOT EXISTS FINANCE_ANALYTICS.PBI;
+
+-- 2. Create a curated contract view.
+CREATE OR REPLACE VIEW FINANCE_ANALYTICS.PBI.VW_CONTRACT_BASE AS
+SELECT
+    CONTRACT_ID,
+    USER_ID,
+    ENTERPRISE_ID,
+    PRODUCT,
+    CONTRACT_START_DATE,
+    CONTRACT_END_DATE,
+    STATUS AS CONTRACT_STATUS,
+    PRINCIPAL_AMOUNT,
+    INTEREST_RATE,
+    ANNUAL_CONTRACT_VALUE,
+    TO_NUMBER(TO_CHAR(CONTRACT_START_DATE, 'YYYYMMDD'))
+        AS START_DATE_KEY,
+    TO_NUMBER(TO_CHAR(CONTRACT_END_DATE, 'YYYYMMDD'))
+        AS END_DATE_KEY,
+    1 AS CONTRACT_COUNT
+FROM FINANCE_RAW.CUSTOMER_CONTRACTS
+WHERE CONTRACT_ID IS NOT NULL;
+
+-- 3. Create the customer dimension.
+CREATE OR REPLACE VIEW FINANCE_ANALYTICS.PBI.DIM_CUSTOMER AS
+SELECT
+    USER_ID AS CUSTOMER_ID,
+    CUSTOMER_NAME,
+    CUSTOMER_TYPE
+FROM FINANCE_RAW.CUSTOMER_CONTRACTS
+WHERE USER_ID IS NOT NULL
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY USER_ID
+    ORDER BY CONTRACT_START_DATE DESC, CONTRACT_ID DESC
+) = 1;
+
+
+-- 4. Create the enterprise dimension.
+CREATE OR REPLACE VIEW FINANCE_ANALYTICS.PBI.DIM_ENTERPRISE AS
+SELECT DISTINCT
+    ENTERPRISE_ID,
+    REGION
+FROM FINANCE_RAW.CUSTOMER_CONTRACTS
+WHERE ENTERPRISE_ID IS NOT NULL;
+
+
+-- 5. Create the product dimension.
+CREATE OR REPLACE VIEW FINANCE_ANALYTICS.PBI.DIM_PRODUCT AS
+SELECT DISTINCT
+    PRODUCT AS PRODUCT_NAME
+FROM FINANCE_RAW.CUSTOMER_CONTRACTS
+WHERE PRODUCT IS NOT NULL;
+
+
+-- 6. Create a date dimension for 2024–2027.
+CREATE OR REPLACE TABLE FINANCE_ANALYTICS.PBI.DIM_DATE AS
+WITH DATES AS (
+    SELECT DATEADD(
+        DAY, SEQ4(), TO_DATE('2024-01-01')
+    ) AS DATE_VALUE
+    FROM TABLE(GENERATOR(ROWCOUNT => 1461))
+)
+SELECT
+    TO_NUMBER(TO_CHAR(DATE_VALUE, 'YYYYMMDD')) AS DATE_KEY,
+    DATE_VALUE AS DATE,
+    YEAR(DATE_VALUE) AS YEAR,
+    'Q' || QUARTER(DATE_VALUE) AS QUARTER,
+    MONTH(DATE_VALUE) AS MONTH_NUMBER,
+    MONTHNAME(DATE_VALUE) AS MONTH,
+    TO_CHAR(DATE_VALUE, 'YYYY-MM') AS YEAR_MONTH
+FROM DATES;
+
+-- 7. Example validation checks.
+SELECT
+    COUNT(*) AS ROW_COUNT,
+    COUNT(DISTINCT CONTRACT_ID) AS DISTINCT_CONTRACTS,
+    COUNT_IF(CONTRACT_ID IS NULL) AS NULL_CONTRACT_IDS
+FROM FINANCE_ANALYTICS.PBI.VW_CONTRACT_BASE;
+
+Implementation Notes
+The source reference FINANCE_RAW.CUSTOMER_CONTRACTS must resolve to the correct Snowflake object. Use the fully qualified DATABASE.SCHEMA.TABLE name if required by the environment.
+The customer dimension uses the most recently started contract record to select descriptive attributes. In production, a governed customer master should be preferred when available. Changing attributes such as credit score and risk band may require historical tracking rather than being stored as static customer attributes.
+The enterprise dimension assumes each enterprise has one consistent region. If enterprise attributes change over time, apply an appropriate historical or current-record selection strategy.
+The date dimension covers January 1, 2024, through December 31, 2027. Extend the range to match the source history and future reporting requirements.
+FACT_CONTRACT_SNAPSHOT should be built from an actual snapshot source, not by copying the current outstanding balance from the contract table into multiple historical dates.
+Validate that each contract has one row in the contract fact and each snapshot has one row per contract and snapshot date. Avoid CREATE OR REPLACE DATABASE in routine deployment scripts because replacing an existing database can destroy existing objects and data.
+
+Once these curated objects are validated, they can be exposed to Power BI through the Snowflake connector for relationship configuration, DAX measure development, RLS implementation, and report creation.
+
