@@ -1,1 +1,16 @@
+This step establishes a secure connection between Power BI Desktop and the curated Snowflake data layer. The objective is to retrieve the approved analytical objects, verify their data and storage configuration, and prepare them for transformation and dimensional modeling.
+
+Implementation Steps
+Open Power BI Desktop: Launch Power BI Desktop and create a new PBIX file or open an approved project file.
+Connect to Snowflake: Navigate to Home → Get data → More → Database → Snowflake. Enter the Snowflake server or account identifier provided by the data platform team.
+Authenticate: Select the organization's approved authentication method and sign in using the authorized identity. Avoid embedding credentials in PBIX files or using personal credentials for production refreshes.
+Select the Warehouse and Database: Choose the approved Snowflake virtual warehouse and the FINANCE_ANALYTICS database. The warehouse determines the compute resources used by Snowflake queries, while the database provides access to the curated analytical objects.
+Select Curated Objects: In the PBI schema, select VW_CONTRACT_BASE, DIM_CUSTOMER, DIM_ENTERPRISE, DIM_PRODUCT, and DIM_DATE, along with the snapshot view or table if historical analysis is required. Confirm that the selected objects match the intended semantic model.
+Choose the Storage Mode: Select Import when scheduled refreshes and cached data provide sufficient freshness and performance. Choose DirectQuery when business requirements justify querying Snowflake at report-interaction time. Evaluate data volume, query performance, concurrency, and latency before finalizing the mode.
+Review Data in Power Query: Select Transform Data to inspect the retrieved objects, verify data types, remove unnecessary columns, check nulls and duplicate keys, and confirm that the data aligns with the expected business grain. Apply additional transformations only where required.
+Load the Data: Select Close & Apply to apply the Power Query transformations and load the prepared data into the model when using Import mode. For DirectQuery, verify that the transformations and queries are supported by the selected connector and storage mode.
+Verify the Model: Open Model view and confirm that all expected tables are available. At this stage, check the table names, columns, data types, and intended keys. Create and validate relationships as part of the subsequent data-modeling step.
+Document the Connection: Record the Snowflake account or server, warehouse, database, schema, selected objects, authentication method, storage mode, and refresh requirements in the implementation documentation. Keep sensitive connection details and credentials out of shared documentation.
+
+Expected Outcome: Power BI is connected to the approved Snowflake analytical layer, and the required data objects are ready for preprocessing, relationship configuration, semantic modeling, and report development.
 
