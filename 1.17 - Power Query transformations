@@ -1,1 +1,11 @@
 
+Power Query prepares the curated Snowflake data for the Power BI semantic model by enforcing consistent data types, validating key fields, removing unnecessary columns, and identifying data-quality issues before loading. Transformations should remain lightweight where possible, with computationally intensive joins, aggregations, and reusable source-level logic performed in Snowflake when practical.
+Implementation Steps
+Connect to Curated Objects: Use FINANCE_ANALYTICS.PBI views and tables instead of raw source data wherever the required preparation has already been completed in Snowflake.
+Set Data Types: Set identifiers such as CONTRACT_ID, USER_ID, and ENTERPRISE_ID to Text; contract dates to Date; financial amounts to an appropriate Decimal or Fixed Decimal type; and CONTRACT_COUNT to Whole Number.
+Validate Financial Fields: Confirm that principal, annual contract value, and outstanding balance contain valid numeric values. Verify that INTEREST_RATE is consistently represented as a decimal fraction or percentage and interpret it accordingly to avoid incorrect calculations.
+Clean and Validate Keys: Trim unnecessary whitespace, standardize blank values, identify missing identifiers, and check for duplicate keys in tables expected to contain unique records. Investigate invalid records rather than silently removing data that may affect financial reporting.
+Remove Unnecessary Columns: Retain only fields required for relationships, business calculations, security, and reporting. This reduces model size and improves maintainability.
+Preserve Query Efficiency: Keep transformations deterministic and avoid unnecessary row-by-row operations. Where supported, use query folding to push compatible transformations back to Snowflake, particularly for large datasets.
+Manage Staging Queries: Disable load for intermediate or helper queries that are used only to prepare other queries and are not required in the final semantic model.
+Validate Before Loading: Refresh the preview, review transformation errors and unexpected nulls, and confirm that the resulting data matches the expected schema and business grain. Select Close & Apply after completing the checks.
