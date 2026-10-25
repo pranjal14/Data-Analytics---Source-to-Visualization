@@ -9,3 +9,46 @@ Remove Unnecessary Columns: Retain only fields required for relationships, busin
 Preserve Query Efficiency: Keep transformations deterministic and avoid unnecessary row-by-row operations. Where supported, use query folding to push compatible transformations back to Snowflake, particularly for large datasets.
 Manage Staging Queries: Disable load for intermediate or helper queries that are used only to prepare other queries and are not required in the final semantic model.
 Validate Before Loading: Refresh the preview, review transformation errors and unexpected nulls, and confirm that the resulting data matches the expected schema and business grain. Select Close & Apply after completing the checks.
+
+
+Example Power Query M Code
+The following example demonstrates how to connect to the curated contract view and assign appropriate data types. Replace the sample server identifier with the approved Snowflake account or server details.
+let
+    Source = Snowflake.Databases(
+        "YOUR_ACCOUNT.snowflakecomputing.com",
+        "PBI_WH"
+    ),
+
+    FinanceDB =
+        Source{[Name = "FINANCE_ANALYTICS"]}[Data],
+
+    PBISchema =
+        FinanceDB{[Name = "PBI"]}[Data],
+
+    ContractBase =
+        PBISchema{
+            [
+                Name = "VW_CONTRACT_BASE",
+                Kind = "View"
+            ]
+        }[Data],
+
+    ChangedType = Table.TransformColumnTypes(
+        ContractBase,
+        {
+            {"CONTRACT_ID", type text},
+            {"USER_ID", type text},
+            {"ENTERPRISE_ID", type text},
+            {"CONTRACT_START_DATE", type date},
+            {"CONTRACT_END_DATE", type date},
+            {"PRINCIPAL_AMOUNT", Currency.Type},
+            {"INTEREST_RATE", Percentage.Type},
+            {"ANNUAL_CONTRACT_VALUE", Currency.Type},
+            {"CONTRACT_COUNT", Int64.Type}
+        }
+    )
+in
+    ChangedType
+Implementation Notes: The example assumes that VW_CONTRACT_BASE contains the listed columns and that the annual contract value is a monetary amount. Currency.Type is appropriate for fixed-decimal monetary values, while Percentage.Type formats a numeric value as a percentage; it does not independently convert a whole-number percentage into a decimal fraction. For example, a source value of 0.115 represents 11.5%, whereas 11.5 represents 1,150% if interpreted as a decimal fraction. Confirm the source convention before applying the type.
+
+The sample code also assumes that OUTSTANDING_BALANCE is maintained in the separate snapshot fact table. If it is included in VW_CONTRACT_BASE, apply the appropriate numeric type there as well. After validation, the prepared queries can be used to establish relationships, develop DAX measures, and build the Power BI semantic model.
