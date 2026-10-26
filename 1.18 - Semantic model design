@@ -1,1 +1,47 @@
 
+The semantic model organizes curated Snowflake data into a star schema so that business measures remain consistent, relationships are predictable, and reports can be filtered efficiently. Fact tables store contract-level financial values or periodic snapshots, while dimension tables provide descriptive attributes for analysis by customer, enterprise, product, and date.
+Implementation Steps
+Create FactContract: Maintain one row per contract, including principal amount, interest rate, annual contract value, contract status, and contract start/end date keys. Ensure ContractID uniquely identifies each contract.
+Create FactContractSnapshot: Maintain one row per contract per snapshot date, typically monthly, with outstanding balance, accrued interest where available, delinquency, and snapshot status. Use the combination of ContractID and SnapshotDateKey to identify each contract snapshot.
+Load Dimension Tables: Create DimCustomer, DimEnterprise, and DimProduct with one row per business entity or product. Each dimension should have a unique key and consistent descriptive attributes. Use surrogate keys where needed, particularly if dimension attributes must be tracked historically.
+Configure DimDate: Use one continuous calendar dimension to support time-based analysis. Create relationships to the relevant date keys in the fact tables. If a fact table contains multiple date roles, such as contract start date and end date, use one active relationship and additional inactive relationships where appropriate, or separate role-playing date dimensions when the reporting requirements justify them.
+Create and Validate Relationships: Connect each dimension to its corresponding fact table using one-to-many relationships, with the dimension on the “one” side. Use single-direction filtering from dimensions to facts by default. Before creating visuals, validate that fact keys map correctly to dimension keys and investigate unmatched records.
+Mark the Date Table: Mark DimDate as the model's date table after confirming that its Date column contains unique, continuous dates with no blanks. Ensure DateKey is unique and consistently represents the corresponding calendar date.
+Centralize Measures: Create a dedicated Measures table to store reusable DAX measures for principal, outstanding exposure, contract counts, delinquency, and period-over-period changes. Define each measure according to the relevant fact-table grain and intended business meaning. For example, outstanding balances should be analyzed from the snapshot fact table and not summed across multiple snapshot dates unless the analysis explicitly requires that calculation.
+
+Validate the Model: Check key uniqueness, relationship cardinality, filter behavior, date calculations, and reconciliation of financial totals against Snowflake. Confirm that slicers and drill-downs return consistent results across report pages.
+Table
+Type
+Grain
+Key
+Important columns
+FactContract
+Fact
+One row per contract
+ContractID / surrogate fact row
+Principal, rate, annual value, status, start/end date keys
+FactContractSnapshot
+Fact
+One row per contract per month
+SnapshotDateKey + ContractID
+Outstanding balance, accrued interest, status
+DimCustomer
+Dimension
+One row per customer
+CustomerKey
+UserID, name, type, risk band, credit score
+DimEnterprise
+Dimension
+One row per enterprise
+EnterpriseKey
+EnterpriseID, name, segment, region
+DimDate
+Dimension
+One row per calendar date
+DateKey
+Date, year, quarter, month, year-month
+
+Star-schema relationship diagram for the project.
+The model should use dimensions to filter the relevant fact tables. DimCustomer, DimEnterprise, and DimProduct connect to FactContract using their respective keys; they can also connect to FactContractSnapshot when the snapshot data contains the same dimension keys or can be reliably associated with them. DimDate connects to the applicable contract and snapshot date keys. This structure supports consistent portfolio analysis while keeping contract-level values separate from date-dependent exposure.
+
+Technical note: A star schema should not contain direct fact-to-fact relationships. If the snapshot fact stores only business identifiers, resolve the relevant dimension keys during Snowflake preparation or in a controlled transformation step. Also, attributes such as customer risk band or credit score may change over time; decide whether reports need current values or historically accurate values before placing these attributes in a dimension.
