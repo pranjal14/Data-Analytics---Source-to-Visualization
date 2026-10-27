@@ -16,3 +16,4 @@ Validate Relationship Integrity: Check for duplicate dimension keys, unmatched f
 
 Test Filter Behavior: Add a simple visual using a measure such as contract count or outstanding balance, then apply slicers for customer, enterprise, product, and date. Confirm that each slicer filters the intended fact data and that totals reconcile with the expected results.
 
+Technical note: The table assumes that the listed dimension keys are present in both fact tables. If a key is not available in a fact, establish the association during Snowflake preparation rather than creating an unsupported relationship. Date relationships should reflect the business meaning of each date: contract start date for origination analysis and snapshot date for exposure trends. Keep these roles distinct to avoid interpreting historical exposure as contract origination activity. 
