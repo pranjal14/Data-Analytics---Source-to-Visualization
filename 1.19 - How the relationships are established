@@ -1,1 +1,18 @@
+Relationships connect dimension tables to fact tables so that filters, slicers, and DAX measures return consistent results across the report. In Power BI, relationships should follow the star-schema design, with each dimension on the one side and the corresponding fact table on the many sides.
+
+Implementation Steps
+
+Open Model View: Identify the primary or surrogate key in each dimension and the matching foreign key in the fact tables. Confirm that dimension keys are unique and that key columns have compatible data types.
+
+Connect Customer and Enterprise Dimensions: Create one-to-many relationships from DimCustomer[CustomerKey] and DimEnterprise[EnterpriseKey] to the corresponding key columns in FactContract.
+
+Connect the Date Dimension: Relate DimDate[DateKey] to FactContract[StartDateKey] to analyze contract originations. If end-date analysis is required, configure an additional inactive relationship to EndDateKey or use a separate role-playing date dimension, depending on reporting needs.
+
+Connect the Snapshot Fact: Create relationships from DimCustomer, DimEnterprise, and DimDate to FactContractSnapshot using the corresponding dimension keys and SnapshotDateKey. Connect DimProduct to each fact table where the required product key is available.
+
+Set Cardinality and Filter Direction: Confirm that each dimension is on the 1 side and each fact is on the * side. Use single-direction filtering from dimensions to facts by default. Avoid unnecessary bidirectional relationships, which can create ambiguous filter paths or unexpected results.
+
+Validate Relationship Integrity: Check for duplicate dimension keys, unmatched fact keys, blank foreign keys, and unexpected many-to-many relationships. Resolve data-quality issues in the source or transformation layer where possible rather than masking them with an unsuitable relationship configuration.
+
+Test Filter Behavior: Add a simple visual using a measure such as contract count or outstanding balance, then apply slicers for customer, enterprise, product, and date. Confirm that each slicer filters the intended fact data and that totals reconcile with the expected results.
 
