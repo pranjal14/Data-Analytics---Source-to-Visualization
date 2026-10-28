@@ -1,1 +1,32 @@
 
+The distinction between fact and dimension tables is based on the business meaning and grain of the data. Fact tables store measurable business activity or periodic measurements, while dimension tables describe the entities and categories used to analyze those measurements. This separation supports consistent aggregation, filtering, and reporting.
+
+FactContract
+
+FactContract stores contract-level information at a grain of one row per contract. It contains measures such as PrincipalAmount and AnnualContractValue, which can generally be summed across distinct contracts when the business definition permits. ContractID identifies the contract and supports distinct contract counts. ContractStatus describes the contract rather than measuring it, but can remain in the fact table when it represents the status of that contract record. For reliable reporting, validate that each ContractID appears only once before calculating totals or counts.
+
+FactContractSnapshot
+
+FactContractSnapshot stores periodic measurements, typically one row per contract per month. It supports month-end portfolio analysis and historical exposure trends. OutstandingBalance is semi-additive: it can be summed across contracts for a selected snapshot date, but should not be summed across multiple dates as if each snapshot were a separate transaction. For trend reporting, select the appropriate reporting date or month-end snapshot first, then aggregate balances across contracts. Confirm that the snapshot data contains genuine historical observations rather than repeated copies of current balances.
+
+Dimension Tables
+
+DimCustomer: Describes the customer, including attributes such as customer ID, name, and customer type. It answers who the customer is and enables customer-level segmentation.
+
+DimEnterprise: Describes the enterprise or group associated with a contract or customer, supporting analysis by enterprise, segment, and region.
+
+DimProduct: Describes the financing product, supporting comparisons across product categories and offerings.
+
+DimDate: Provides a consistent calendar for analyzing contract originations, contract end dates, and periodic snapshots. Its date relationships should reflect the business event being analyzed.
+
+Practical Modeling Rules
+
+Validate the grain and key uniqueness of every fact and dimension before building measures.
+
+Sum contract-level financial amounts only when the values are additive and each contract is represented once in the calculation.
+
+For snapshot-based measures, apply the intended snapshot-date context before aggregating outstanding balances.
+
+Keep descriptive attributes in dimensions where practical, while retaining fact-level status or event attributes when they describe the specific record represented by the fact.
+
+Validate KPI definitions against business requirements and reconcile key totals with Snowflake before publishing the report.
