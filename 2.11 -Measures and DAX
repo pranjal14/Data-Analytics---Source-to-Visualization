@@ -1,1 +1,115 @@
 
+Create a dedicated Measures table in Power BI to centralize business KPIs and make them reusable across report pages. Base measures should be defined first, followed by filtered portfolio measures, risk indicators, ratios, and time-based calculations.
+Implementation Steps
+Create a Measures Table: Add a dedicated table to store DAX measures, keeping business logic organized and separate from source data columns.
+Define Base Measures: Create contract counts, principal, annual contract value, and outstanding exposure. Use FactContract for contract-level amounts and FactContractSnapshot for date-dependent balances.
+Create Filtered Measures: Define active contracts, delinquent contracts, active outstanding exposure, high-risk customers, and high-risk exposure using CALCULATE and appropriate filter conditions.
+Calculate Ratios Safely: Use DIVIDE for rates and averages to handle zero or blank denominators without generating errors. Use weighted calculations when a simple average would misrepresent the portfolio.
+Add Time-Based Measures: Confirm that DimDate is marked as the date table and correctly related to the snapshot fact. For outstanding exposure, compare the relevant period-end balances rather than summing balances across all dates in a period.
+Test and Reconcile: Validate each measure in a simple table or card, then compare its output with expected business calculations and corresponding Snowflake results before using it in report visuals.
+Example DAX Measures
+The following measures assume the column names shown below. Adjust them to match the final semantic model, including whether the status field is named Status or ContractStatus.
+Core contract measures
+Total Contracts =
+DISTINCTCOUNT ( FactContract[ContractID] )
+
+Total Principal =
+SUM ( FactContract[PrincipalAmount] )
+
+Annual Contract Value =
+SUM ( FactContract[AnnualContractValue] )
+
+Average Contract Value =
+DIVIDE ( [Total Principal], [Total Contracts] )
+
+Active Contracts =
+CALCULATE (
+    [Total Contracts],
+    FactContract[ContractStatus] = "Active"
+)
+
+Delinquent Contracts =
+CALCULATE (
+    [Total Contracts],
+    FactContract[ContractStatus] = "Delinquent"
+)
+
+Delinquency Rate =
+DIVIDE (
+    [Delinquent Contracts],
+    [Total Contracts]
+)
+
+Average Interest Rate =
+AVERAGE ( FactContract[InterestRate] )
+
+Weighted Average Interest Rate =
+DIVIDE (
+    SUMX (
+        FactContract,
+        FactContract[PrincipalAmount]
+            * FactContract[InterestRate]
+    ),
+    [Total Principal]
+)
+
+Outstanding exposure and risk measures
+
+Snapshot Outstanding =
+SUM ( FactContractSnapshot[OutstandingBalance] )
+
+Active Outstanding =
+CALCULATE (
+    [Snapshot Outstanding],
+    FactContractSnapshot[ContractStatus] = "Active"
+)
+
+High Risk Customers =
+CALCULATE (
+    DISTINCTCOUNT ( DimCustomer[CustomerKey] ),
+    DimCustomer[RiskBand] = "High"
+)
+
+High Risk Exposure =
+CALCULATE (
+    [Snapshot Outstanding],
+    DimCustomer[RiskBand] = "High"
+)
+
+Exposure per Enterprise =
+DIVIDE (
+    [Snapshot Outstanding],
+    DISTINCTCOUNT ( DimEnterprise[EnterpriseKey] )
+)
+
+Period-end and year-over-year exposure measures
+These examples assume the snapshot fact contains a valid snapshot for each reporting month-end. They calculate exposure at the last date in the current date context, rather than adding balances across dates.
+Month-End Outstanding =
+CALCULATE (
+    [Snapshot Outstanding],
+    LASTDATE ( DimDate[Date] )
+)
+
+Prior Year Outstanding =
+CALCULATE (
+    [Month-End Outstanding],
+    SAMEPERIODLASTYEAR ( DimDate[Date] )
+)
+
+YoY Outstanding Change =
+[Month-End Outstanding] - [Prior Year Outstanding]
+
+YoY Outstanding % =
+DIVIDE (
+    [YoY Outstanding Change],
+    [Prior Year Outstanding]
+)
+
+Important Implementation Notes
+Snapshot balances: Snapshot Outstanding is a base aggregation, not a safe standalone KPI when multiple snapshot dates are in context. Use Month-End Outstanding or another explicitly defined as-of-date measure for portfolio totals and trend comparisons. If month-end snapshots are not guaranteed, the measure must identify the latest available snapshot date within the reporting period.
+Time intelligence: MTD and YTD functions should not be applied blindly to outstanding balances because balances are point-in-time measurements, not additive flows. For balance reporting, use period-end values; use MTD/YTD aggregation for genuinely additive measures, such as new principal originated during the period.
+Risk measures: The example assumes RiskBand is available in DimCustomer. If risk classification changes over time, use historically appropriate risk attributes when analyzing past exposure.
+Status consistency: Ensure that status values and their business definitions are standardized across fact tables. Active and delinquent status filters should use the appropriate contract or snapshot status, depending on the KPI.
+Distinct counts and weighting: Validate that FactContract contains one row per contract. The weighted interest rate assumes InterestRate is stored as a decimal fraction and that principal is the intended weighting basis.
+Date Relationships: DimDate must filter FactContractSnapshot through SnapshotDateKey for snapshot-based time calculations. Contract origination analysis should use the contract start-date relationship.
+Once validated, these measures can power KPI cards, portfolio trend charts, enterprise comparisons, delinquency analysis, and risk-focused report pages without duplicating calculation logic in individual visuals.
