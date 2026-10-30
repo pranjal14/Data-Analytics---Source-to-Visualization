@@ -1,1 +1,50 @@
 
+The KPI catalogue defines the approved business meaning, calculation basis, and reporting purpose of each metric. Before a KPI is published, confirm its source columns, implement the base measure in DAX, test filter behavior, reconcile the result with Snowflake, and document the approved definition. Use the same validated measure across report pages to maintain consistency.
+
+For semi-additive metrics such as outstanding exposure, explicitly document the reporting-date logic—for example, latest available balance, month-end balance, or balance as of a selected date—so users can interpret results correctly.
+
+KPI
+Definition
+Why it matters
+Suggested visual
+Total Principal
+Sum of original principal
+Portfolio scale
+Card
+Total Outstanding
+Sum of current exposure
+Current credit exposure
+Card
+Annual Contract Value
+Sum of annualized value
+Revenue/value proxy
+Card
+Active Contracts
+Distinct contracts with Active status
+Current book size
+Card
+Delinquency Rate
+Delinquent contracts / total contracts
+Portfolio quality
+Card + trend
+High Risk Customers
+Distinct customers with High risk band
+Risk population
+Card
+High Risk Exposure
+Outstanding for High risk customers
+Risk concentration
+Card
+Weighted Average Rate
+Σ(principal × rate) / Σ(principal)
+Portfolio pricing
+Card
+YoY Outstanding %
+Current vs prior-year outstanding
+Growth/decline
+KPI/line
+Exposure per Enterprise
+Outstanding / enterprise count
+Concentration indicator
+Bar/table
+
