@@ -1,1 +1,12 @@
 
+Design the Power BI report around the key business questions and validated KPIs, progressing from portfolio-level summaries to enterprise, customer, product, and contract-level analysis. Keep page layouts consistent, prioritize decision-relevant information, and ensure that every visual supports a defined analytical purpose.
+
+Implementation Steps
+Build the Executive Overview: Start with KPI cards for Total Principal, Total Outstanding, Active Contracts, Delinquency Rate, and High Risk Exposure. Add portfolio composition and trend visuals to provide an immediate view of overall performance and risk.
+Create Enterprise Analysis: Compare enterprises by outstanding exposure, principal, contract counts, segment, and region. Use ranked bar charts and summary tables to identify concentration and differences across enterprise groups.
+Develop Customer and Risk Analysis: Show customer distribution by risk band, credit-score ranges, delinquency, and high-risk exposure. Enable users to identify risk concentrations and investigate the customers contributing to them.
+Build Product Analysis: Compare products by principal, outstanding exposure, contract volume, interest rates, and status. Use consistent measures and category definitions to support meaningful product comparisons.
+Add Trend Analysis: Show monthly or period-end outstanding exposure, year-over-year movement, new contract originations, and delinquency trends. Distinguish point-in-time balances from period-based activity so that trends are interpreted correctly.
+Configure Shared Slicers: Add relevant filters for Date, Region, Enterprise, Segment, Product, Risk Band, and Status. Use synchronized slicers across pages where appropriate, and verify that each filter interacts with visuals as intended.
+Enable Drill-Through: Configure drill-through from enterprise summaries to customer and contract details. Pass the relevant enterprise and customer context so users can investigate portfolio movements without losing the context of their selection. Apply appropriate access controls to detailed pages.
+Validate and Refine: Compare visual results with approved KPI definitions and Snowflake totals. Test slicers, cross-filtering, tooltips, drill-through, date selections, and page navigation. Remove redundant visuals and retain those that support a documented business question.
