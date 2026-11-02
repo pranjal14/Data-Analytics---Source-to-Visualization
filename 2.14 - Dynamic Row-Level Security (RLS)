@@ -1,1 +1,29 @@
+Dynamic Row-Level Security (RLS) restricts the enterprise and financial data visible to each report consumer based on their authenticated identity. In this design, a governed SecurityUser table maps each user's email address to the enterprises they are authorized to access. Because a manager may oversee multiple enterprises, the same email address can appear in multiple rows.
+Implementation Steps
+Create the Security Mapping: Source or create a governed SecurityUser table containing UserEmail and EnterpriseID. Maintain access assignments through the approved identity or security administration process.
+Validate Access Mappings: Ensure each row represents a valid user-to-enterprise authorization. Standardize email addresses and enterprise identifiers, and remove duplicate or invalid assignments.
+Configure the Security Filter: Create an EnterpriseManager role in Power BI Desktop. Apply a dynamic DAX filter to DimEnterprise so that only enterprises assigned to the signed-in user remain visible.
+Propagate Security to Facts: Confirm that the filtered DimEnterprise restricts both FactContract and FactContractSnapshot through their relationships. Apply equivalent security paths to any additional fact tables containing enterprise-level data.
+Test Single- and Multi-Enterprise Access: Use Modeling → View as to test users with one enterprise assignment and users with multiple assignments. Verify that authorized data is visible and unauthorized enterprise data is excluded.
+Publish and Validate: Publish the semantic model, assign the intended users or groups to the RLS role in Power BI Service, and test the report using representative user identities. Ensure consumers access the report through an appropriate permission level; workspace Admin, Member, and Contributor roles are not restricted by RLS in the same way as Viewer access.
+Maintain Security Governance: Keep production access mappings under the control of the approved security process. Review access changes regularly and test them after changes to the security table, relationships, or semantic model.
+
+
+
+
+
+Example Dynamic RLS Configuration
+The following approach applies the RLS expression directly to DimEnterprise. It assumes SecurityUser is loaded into the model and contains the specified columns. The security table can remain disconnected from the enterprise dimension when this direct filter is used.
+VAR CurrentUser = USERPRINCIPALNAME()
+RETURN
+    CONTAINS (
+        FILTER (
+            SecurityUser,
+            SecurityUser[UserEmail] = CurrentUser
+        ),
+        SecurityUser[EnterpriseID],
+        DimEnterprise[EnterpriseID]
+    )
+This expression permits an enterprise dimension row only when the signed-in user has a matching authorization record. The resulting filter propagates through the normal dimension-to-fact relationships.
+Alternative relationship-based design: If SecurityUser[EnterpriseID] is related to DimEnterprise[EnterpriseID], configure security-filter propagation deliberately. A standard single-direction relationship may not propagate a filter from the security table back to the enterprise dimension. Avoid enabling bidirectional filtering without checking for ambiguous paths and unintended access.
 
