@@ -1,1 +1,16 @@
 
+Use representative test identities to confirm that dynamic RLS returns exactly the enterprises authorized for each user. Validate the behavior in Power BI Desktop and repeat the tests after publishing to Power BI Service.
+
+Validation Procedure
+
+Simulate or sign in as a user assigned to one enterprise and confirm that only that enterprise's authorized records are visible.
+
+Test a multi-enterprise user and confirm that all assigned enterprises are accessible, with no additional enterprises exposed.
+
+Check contract counts, principal, outstanding exposure, and other financial KPIs to verify that they reflect only the authorized data.
+
+Test both FactContract and FactContractSnapshot, including drill-through pages and report filters, to ensure that security is applied consistently.
+
+Repeat the tests in Power BI Service using the published semantic model and actual role assignments.
+
+Expected result: manager1@finance-demo.com can access data for ENT1001 and ENT1008, while manager2@finance-demo.com can access only ENT1015. Users without a valid mapping should not see enterprise data through this role. Confirm that no alternative relationship path, additional role, or elevated workspace permission bypasses the intended restriction.
