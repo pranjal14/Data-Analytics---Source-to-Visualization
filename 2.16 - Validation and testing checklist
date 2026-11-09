@@ -1,1 +1,18 @@
 
+Validation confirms that the Power BI model accurately represents the curated Snowflake data, applies business rules consistently, enforces access restrictions, and performs acceptably. Execute testing across source reconciliation, model integrity, business logic, security, and performance before promoting the solution.
+
+Implementation Steps
+
+Source Reconciliation: Compare Snowflake and Power BI row counts, distinct contract counts, and principal totals. Compare outstanding balances at the same reporting snapshot date rather than summing balances across all historical snapshots.
+
+Model Integrity: Check for null or duplicate dimension keys, unmatched fact foreign keys, incorrect relationship cardinality, and unexpected blank values. Confirm that each fact table follows its documented grain.
+
+Business Logic: Validate delinquency, risk, exposure, and time-intelligence measures using manually calculated examples. Test representative date ranges, status filters, and enterprise selections.
+
+Security Testing: Test at least three scenarios: a user assigned to one enterprise, a user assigned to multiple enterprises, and a user with no valid enterprise assignment. Confirm that unauthorized data remains inaccessible.
+
+Performance Testing: Use Power BI Performance Analyzer to identify slow visuals. Review model size, query behavior, high-cardinality columns, and unnecessary calculations; optimize based on measured bottlenecks.
+
+Operational Documentation: Record the data owner, security owner, refresh frequency, KPI definitions, test evidence, exceptions, and resolution status.
+
+Maintain a validation log containing the test name, test date, expected result, actual result, pass/fail status, and disposition of any exception. Resolve critical discrepancies and security failures before release.
