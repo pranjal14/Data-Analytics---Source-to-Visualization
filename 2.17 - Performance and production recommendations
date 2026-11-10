@@ -1,1 +1,20 @@
 
+Optimize the solution in a structured sequence, beginning with data-model design and source preparation before tuning individual visuals. The objective is to maintain responsive reporting, reliable refreshes, and consistent business logic as data volume and report usage increase.
+
+Implementation Recommendations
+
+Use a Star Schema: Keep fact and dimension tables separate, remove unnecessary columns, and avoid duplicating descriptive attributes across large fact tables.
+
+Push Suitable Transformations to Snowflake: Perform expensive joins, filtering, and reusable data preparation in Snowflake where practical. Use query folding where supported to reduce unnecessary data transfer and processing in Power BI.
+
+Select the Appropriate Storage Mode: Prefer Import mode when scheduled refresh meets business freshness requirements and fast interactive analysis is the priority. Evaluate DirectQuery or composite models when data volume, latency, or operational requirements justify the additional complexity.
+
+Evaluate Incremental Refresh: For large contract or snapshot histories, configure incremental refresh using an appropriate date column and the required RangeStart and RangeEnd parameters. Validate the refresh policy and historical-data behavior before deployment.
+
+Optimize Calculations: Prefer measures for calculations that must respond dynamically to report filter context. Use calculated columns only when a stored row-level value is needed for relationships, grouping, filtering, or other model requirements.
+
+Reduce Model Complexity: Keep dimensions focused, use appropriate data types, and consider integer surrogate keys where they provide practical benefits. Remove unused columns and avoid unnecessary high-cardinality fields in visuals.
+
+Optimize Large Snapshot Tables: Assess Snowflake query plans and workload patterns before introducing clustering or other physical optimizations. For very large snapshot facts, evaluate incremental refresh, DirectQuery, or composite architecture against actual performance and freshness requirements.
+
+Centralize Shared Business Logic: When multiple reports use the same governed KPIs, maintain a shared semantic model and use thin reports where appropriate. This reduces duplicated calculations and simplifies governance.
