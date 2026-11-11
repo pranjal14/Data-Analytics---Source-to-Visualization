@@ -1,1 +1,26 @@
+Deploy the solution through controlled development, testing, and production environments. Each stage should produce a validated output before the solution advances to the next stage.
+
+Deployment Steps
+
+Develop and validate Snowflake curated views and tables in the approved development environment.
+
+Configure Power BI connections and implement Power Query transformations.
+
+Build fact and dimension tables and validate the star-schema relationships.
+
+Mark DimDate as the date table and test date-based calculations.
+
+Create DAX measures and reconcile KPI results with Snowflake.
+
+Build report pages, slicers, drill-through navigation, and visual interactions.
+
+Configure dynamic RLS and test representative user-access scenarios.
+
+Publish the semantic model and report to the development workspace and validate the published behavior.
+
+Configure the approved Snowflake cloud connection, credentials, permissions, and scheduled refresh for Import models. Validate connectivity and refresh behavior for the selected storage mode.
+
+Complete user acceptance testing, document approval, and promote the solution through Test to Production using the organization's controlled deployment process.
+
+After production deployment, verify report access, refresh status, security assignments, and key KPI totals. Establish an operational process for monitoring failures and managing subsequent model changes.
 
