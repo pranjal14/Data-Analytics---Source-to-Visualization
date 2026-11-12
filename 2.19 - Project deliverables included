@@ -1,1 +1,22 @@
+Maintain the implementation artifacts in the approved project repository so that the solution can be reviewed, reproduced, and maintained by other analysts. Keep SQL, Power Query, DAX, security logic, diagrams, and report documentation aligned with the deployed semantic model.
+
+
+Deliverable
+Purpose
+financial_powerbi_sample_data.xlsx
+Representative synthetic source and modeled tables
+01_snowflake_views.sql
+Snowflake preparation scripts and curated-view definitions
+02_power_query_m.txt
+Power Query connection and transformation examples
+03_dax_measures.txt
+Base measures, KPI calculations, and time-intelligence logic
+04_rls_dax.txt
+Dynamic RLS expressions and security implementation notes
+star_schema_diagram.png
+Fact, dimension, key, and relationship diagram
+powerbi_report_mockup.png
+Illustrative report-page layouts and visual design
+
+Completion check: Confirm that each required artifact exists, is version-controlled or stored in the approved project location, and reflects the final implementation. Clearly distinguish illustrative mockups and sample scripts from validated production artifacts.
 
