@@ -1,1 +1,17 @@
 
+The implementation examples in this document describe a representative financial analytics solution. Confirm all environment-specific settings, business definitions, and governance requirements with the responsible teams before production use.
+
+Sample Data: The workbook and example records are synthetic and intended for demonstration or training, not actual customer reporting.
+
+Snowflake Configuration: Actual account identifiers, database and schema names, warehouse settings, authentication methods, network policies, and permissions must be confirmed by the data platform team.
+
+Business Definitions: Finance and Risk stakeholders must approve KPI definitions, including delinquency eligibility, annual contract value, risk classifications, and reporting-date conventions.
+
+Security Governance: The enterprise access mapping must be maintained by the approved identity and access governance process. Power BI RLS must be tested against actual deployment permissions.
+
+Historical Data: Snapshot-based analysis depends on genuine historical records at the documented snapshot grain. Current balances must not be copied into prior periods to simulate historical exposure.
+
+Data Ownership and Refresh: Confirm data owners, refresh frequency, expected freshness, exception handling, and support responsibilities before release.
+
+Production Controls: Validate SQL scripts, credentials, access grants, and deployment procedures in the appropriate environment. Avoid destructive replacement of production objects without an approved change and recovery plan.
+
