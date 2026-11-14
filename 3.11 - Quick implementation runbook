@@ -1,1 +1,35 @@
 
+Use the runbook as the execution checklist. Complete each phase in sequence and do not move to the next phase until the expected output has been validated.
+At each phase, capture the validation result and any exceptions so the final model has a traceable implementation and testing history.
+
+Phase
+Power BI action
+Expected output
+1. Connect
+Get Data → Snowflake
+Source tables visible
+2. Transform
+Power Query types/cleanup
+Clean, typed queries
+3. Model
+Create facts/dimensions + relationships
+Star schema
+4. Measures
+Add DAX measures
+Governed KPI layer
+5. Visualize
+Build overview/trend/risk pages
+Interactive report
+6. Secure
+Create RLS role + mapping
+Enterprise-level security
+7. Validate
+Reconcile with Snowflake
+Trusted numbers
+8. Publish
+Workspace + refresh + permissions
+Production-ready semantic model/report
+
+ 
+ 
+The implementation is complete when the model and report have passed reconciliation and security testing, business stakeholders have approved the KPIs, operational settings are configured, and the required documentation and deliverables are available to the support team.
